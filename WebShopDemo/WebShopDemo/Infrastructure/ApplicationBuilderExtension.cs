@@ -29,12 +29,41 @@ namespace WebShopDemo.Infrastructure
             return app;
         }
 
-        private static Task RoleSeeder(IServiceProvider services)
+        private static async Task RoleSeeder(IServiceProvider services)
         {
-            throw new NotImplementedException();
+            public static async Task<ApplicationBuilder> PreparedDatabase(this IApplicationBuilder app)
+            {
+                using var serviceScope = app.ApplicationServices.CreateScope();
+
+                var services = serviceScope.ServiceProvider;
+
+                await RoleSeeder(services);
+                await SeedAdministrator(services);
+                return app;
+            }
         }
 
-        private static async Task SeedAdministrator(IServiceProvider serviceProvider)
+        private static async Task RoleSeeder((IServiceProvider serviceProvider)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            string[] roleNames = { "Administrator", "Client" };
+
+            IdentityResult roleResult;
+
+            foreach (var role in roleNames)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(role);
+
+                if (!roleExist)
+                {
+                    roleResult = await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+        }
+
+        
+            private static async Task SeedAdministrator(IServiceProvider serviceProvider)
         {
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
