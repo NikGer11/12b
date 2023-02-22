@@ -6,7 +6,7 @@ using WebShopDemo.Domain;
 
 namespace WebShopDemo.Abstractions
 {
-    interface IBrandService
+    public interface IBrandService
     {
         List<Brand> GetBrands();
 

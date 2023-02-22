@@ -40,13 +40,16 @@ namespace WebShopDemo
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+            services.AddControllersWithViews();
+
+            services.AddTransient<ProductService, ProductService>();
 
             services.AddTransient<ICategoryService, CategoryService>();
             services.AddTransient<IBrandService, BrandService>();
-        
 
 
-            services.AddControllersWithViews();
+
+            services.AddRazorPages();
             services.Configure<IdentityOptions>(option =>
             {
                 option.Password.RequireDigit = false;
