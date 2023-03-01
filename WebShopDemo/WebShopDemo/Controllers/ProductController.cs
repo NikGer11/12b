@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ using WebShopDemo.Services;
 
 namespace WebShopDemo.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
@@ -61,7 +63,8 @@ namespace WebShopDemo.Controllers
             }
             return View();
         }
-
+        
+        [AllowAnonymous]
         public ActionResult Index(string searchStringCategoryName, string searchStringBrandName)
         {
             List<ProductIndexVM> products = _productService.GetProducts(searchStringCategoryName, searchStringBrandName)
@@ -85,15 +88,23 @@ namespace WebShopDemo.Controllers
             Product product = _productService.GetProductById(id);
             if (product == null)
             {
-                return NotFound();
+                var updated = _productService.Uptade(id, product.ProductName, product.BrandId, product.CategoryId, product.Picture, product.Quantity, product.Price, product.Discount);
+
+                if (updated)
+                {
+                    return this.RedirectToAction("Index");
+                }
             }
+            return View(product);
 
             ProductEditVM updatedProduct = new ProductEditVM()
             {
                 Id = product.Id,
                 ProductName = product.ProductName,
                 BrandId = product.BrandId,
+                //BrandName = product.Brand.BrandName,
                 CategoryId = product.CategoryId,
+                //CategoryName = product.Category.CateogoryName,
                 Picture = product.Picture,
                 Quantity = product.Quantity,
                 Price = product.Price,
@@ -116,6 +127,68 @@ namespace WebShopDemo.Controllers
                 .ToList();
             return View(updatedProduct);
         }
+        [AllowAnonymous]
+        public ActionResult Details(int id)
+        {
+            Product item = _productService.GetProductById(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+            ProductDetailsVM product = new ProductDetailsVM()
+            {
+                Id = item.Id,
+                ProductName = item.ProductName,
+                BrandId = item.BrandId,
+                //BrandName = product.Brand.BrandName,
+                CategoryId = item.CategoryId,
+                //CategoryName = product.Category.CateogoryName,
+                Picture = item.Picture,
+                Quantity = item.Quantity,
+                Price = item.Price,
+                Discount = item.Discount
+            };
+            return View(product);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id)
+        {
+            Product item = _productService.GetProductById(id);
+            if (item == null)
+            {
+                var deleted = _productService.RemoveById(id);
+
+                if (deleted)
+                {
+                    return this.RedirectToAction("Success");
+                }
+                else
+                {
+                    return View();
+                }
+                
+            }
+            
+            ProductDeleteVM product = new ProductDeleteVM()
+            {
+                Id = item.Id,
+                ProductName = item.ProductName,
+                BrandId = item.BrandId,
+                //BrandName = product.Brand.BrandName,
+                CategoryId = item.CategoryId,
+                //CategoryName = product.Category.CateogoryName,
+                Picture = item.Picture,
+                Quantity = item.Quantity,
+                Price = item.Price,
+                Discount = item.Discount
+            };
+            return View(product);
+        }
+        public IActionResult Success()
+        {
+            return View();
+        }
     }
 }
-        
+      
